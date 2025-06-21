@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Unemployment Trends</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Analytics -->
+    <!-- Application Structure Plan: A narrative "scrollytelling" structure will guide the user through global unemployment. It starts with an overview (key stats), then progresses to historical trends (interactive chart), delves into the different causes via a tabbed interface, highlights youth unemployment, and concludes with future projections. This sequential, thematic structure is chosen to make complex economic information digestible and engaging, allowing users to build understanding progressively rather than navigating a disparate dashboard. -->
+    <!-- Visualization & Content Choices: Key Stats (Inform): HTML stat cards for current rates. Global Trends (Change): Chart.js Line Chart with historical data and tooltips. Causes (Organize): Tabbed interface using JS for toggling detailed explanations. Youth Unemployment (Compare/Inform): HTML text with key figures. Projections (Inform): Simple text. All visuals are Chart.js (Canvas) or HTML/CSS. CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #374151; /* slate-700 */
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #1f2937; /* gray-900 */
+            border-bottom-color: #1f2937;
+        }
+        .tab-button.active {
+            background-color: #1f2937; /* gray-900 */
+            color: white;
+            border-color: #1f2937;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px; /* Max width for chart */
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px; /* Base height */
+            max-height: 450px; /* Max height for chart */
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px; /* Slightly taller on desktop */
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <nav class="bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-gray-900">Global Unemployment</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="nav-link px-3 py-2 text-sm font-medium text-gray-700 border-b-2 border-transparent">Overview</a>
+                        <a href="#trends" class="nav-link px-3 py-2 text-sm font-medium text-gray-700 border-b-2 border-transparent">Trends</a>
+                        <a href="#causes" class="nav-link px-3 py-2 text-sm font-medium text-gray-700 border-b-2 border-transparent">Causes</a>
+                        <a href="#youth" class="nav-link px-3 py-2 text-sm font-medium text-gray-700 border-b-2 border-transparent">Youth Unemployment</a>
+                        <a href="#outlook" class="nav-link px-3 py-2 text-sm font-medium text-gray-700 border-b-2 border-transparent">Outlook</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
+        
+        <!-- Overview Section -->
+        <section id="overview" class="scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl">Understanding Unemployment Worldwide</h2>
+                <p class="mt-4 text-lg text-gray-600">This report provides an interactive overview of global unemployment, exploring current rates, historical trends, underlying causes, and future projections.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-5xl font-bold text-indigo-600">4.89%</p>
+                    <p class="mt-2 text-lg font-semibold text-gray-700">Global Unemployment Rate (2024)</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-5xl font-bold text-green-600">5.1%</p>
+                    <p class="mt-2 text-lg font-semibold text-gray-700">Global Unemployment Rate (2023)</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-5xl font-bold text-purple-600">13.57%</p>
+                    <p class="mt-2 text-lg font-semibold text-gray-700">Youth Unemployment Rate (2024)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trends Section -->
+        <section id="trends" class="mt-20 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Global Unemployment Trends (1991-2024)</h2>
+                <p class="mt-4 text-lg text-gray-600">Unemployment rates fluctuate significantly with economic cycles and global events. This chart visualizes the worldwide trend over the past three decades.</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="chart-container">
+                    <canvas id="unemploymentTrendChart"></canvas>
+                </div>
+                <p class="mt-4 text-sm text-gray-500 text-center">Data Source: Macrotrends LLC</p>
+            </div>
+        </section>
+
+        <!-- Causes Section -->
+        <section id="causes" class="mt-20 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Understanding the Causes of Unemployment</h2>
+                <p class="mt-4 text-lg text-gray-600">Unemployment is influenced by a complex interplay of factors. Explore the main categories of unemployment causes.</p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="mb-6 border-b border-gray-200">
+                    <nav class="-mb-px flex flex-wrap justify-center space-x-2 sm:space-x-4" aria-label="Tabs">
+                        <button class="tab-button whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm rounded-t-lg border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300 active" data-tab="cyclical">Cyclical Unemployment</button>
+                        <button class="tab-button whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm rounded-t-lg border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300" data-tab="structural">Structural Unemployment</button>
+                        <button class="tab-button whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm rounded-t-lg border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300" data-tab="frictional">Frictional Unemployment</button>
+                        <button class="tab-button whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm rounded-t-lg border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300" data-tab="institutional">Institutional Unemployment</button>
+                    </nav>
+                </div>
+
+                <div id="tab-content">
+                    <div class="tab-pane active" id="cyclical">
+                        <h3 class="font-bold text-xl text-gray-900 mb-3">Cyclical Unemployment</h3>
+                        <p class="text-gray-700">This type of unemployment is directly tied to the business cycle. It occurs during economic downturns or recessions when there isn't enough aggregate demand in the economy to provide jobs for everyone who wants to work. As demand for goods and services falls, businesses reduce production and lay off workers.</p>
+                        <p class="mt-2 text-gray-600 italic">Example: Job losses during the 2008 financial crisis or the COVID-19 pandemic lockdowns.</p>
+                    </div>
+                    <div class="tab-pane hidden" id="structural">
+                        <h3 class="font-bold text-xl text-gray-900 mb-3">Structural Unemployment</h3>
+                        <p class="text-gray-700">Structural unemployment arises from fundamental and permanent changes in the structure of the economy. This can be due to technological advancements (automation, AI), shifts in industries (decline of manufacturing), or jobs moving overseas (globalization). It results in a mismatch between the skills workers possess and the skills employers need.</p>
+                        <p class="mt-2 text-gray-600 italic">Example: Factory workers displaced by robots, or coal miners losing jobs as renewable energy grows.</p>
+                    </div>
+                    <div class="tab-pane hidden" id="frictional">
+                        <h3 class="font-bold text-xl text-gray-900 mb-3">Frictional Unemployment</h3>
+                        <p class="text-gray-700">This is a natural and often temporary type of unemployment that occurs when people are voluntarily moving between jobs or entering the workforce for the first time. It reflects the time it takes for workers to search for new jobs and for employers to find suitable candidates.</p>
+                        <p class="mt-2 text-gray-600 italic">Example: A recent college graduate looking for their first job, or someone leaving one job to seek a better opportunity.</p>
+                    </div>
+                    <div class="tab-pane hidden" id="institutional">
+                        <h3 class="font-bold text-xl text-gray-900 mb-3">Institutional Unemployment</h3>
+                        <p class="text-gray-700">Institutional unemployment results from long-term or permanent institutional factors and incentives in the economy. These can include government policies (like minimum wage laws, unemployment benefits), labor market phenomena (e.g., efficiency wages), or unionization rates that affect hiring practices and labor supply.</p>
+                        <p class="mt-2 text-gray-600 italic">Example: Minimum wage laws raising labor costs, potentially reducing hiring for low-skill jobs.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Youth Unemployment Section -->
+        <section id="youth" class="mt-20 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 tracking-tight">The Challenge of Youth Unemployment</h2>
+                <p class="mt-4 text-lg text-gray-600">Youth unemployment remains a critical global issue, consistently higher than the general unemployment rate.</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <div>
+                    <h3 class="font-bold text-xl text-gray-900 mb-3">Disproportionate Impact on Young Workers</h3>
+                    <p class="text-gray-700 mb-4">Globally, the youth unemployment rate (ages 15-24) in 2024 stands at approximately **13.57%**, which is significantly more than double the overall global unemployment rate of **4.89%**.</p>
+                    <p class="text-gray-700">This gap highlights challenges such as skill mismatches, limited access to quality education and training, and the difficulty young people face in gaining initial work experience.</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-6xl font-bold text-indigo-700">2.7x</p>
+                    <p class="mt-2 text-lg font-semibold text-gray-700">Youth Unemployment Rate is ~2.7 Times Higher Than General Rate</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Outlook Section -->
+        <section id="outlook" class="mt-20 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Future Outlook</h2>
+                <p class="mt-4 text-lg text-gray-600">Labour markets have shown resilience, but vulnerabilities persist. International organizations provide projections for the coming years.</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="font-bold text-xl text-gray-900 mb-3">Projected Global Unemployment (ILO)</h3>
+                <p class="text-gray-700 mb-4">The International Labour Organization (ILO) projects that the global unemployment rate, after a period of decline post-pandemic, is expected to **increase slightly to 5.2% in 2024** from 5.1% in 2023. This implies an additional **two million workers** globally will be looking for jobs.</p>
+                <p class="text-gray-700">Factors contributing to this include deteriorating economic conditions in some regions and persistent inequalities, particularly in low-income countries, where job gaps remain significantly higher.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-100 mt-12">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm">
+            <p>&copy; 2025 Global Unemployment Report. Data for illustrative purposes based on public information.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Data for the unemployment trend chart (selected representative years)
+            const unemploymentData = {
+                labels: ['1991', '1995', '2000', '2005', '2008', '2009', '2010', '2011', '2015', '2019', '2020', '2021', '2022', '2023', '2024'],
+                values: [5.13, 5.93, 6.12, 6.23, 5.83, 6.42, 6.29, 6.16, 6.01, 5.6, 6.61, 6.06, 5.26, 4.92, 4.89]
+            };
+
+            const chartCtx = document.getElementById('unemploymentTrendChart').getContext('2d');
+            new Chart(chartCtx, {
+                type: 'line',
+                data: {
+                    labels: unemploymentData.labels,
+                    datasets: [{
+                        label: 'Global Unemployment Rate (%)',
+                        data: unemploymentData.values,
+                        borderColor: '#1f2937', /* gray-900 */
+                        backgroundColor: 'rgba(55, 65, 81, 0.2)', /* gray-700 with transparency */
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: '#1f2937',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#475569',
+                                font: {
+                                    size: 14,
+                                    family: 'Inter'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            bodyFont: {
+                                family: 'Inter'
+                            },
+                            titleFont: {
+                                family: 'Inter'
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#6b7280', /* gray-500 */
+                                font: {
+                                    family: 'Inter'
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Unemployment Rate (%)',
+                                color: '#475569',
+                                font: {
+                                    size: 14,
+                                    family: 'Inter'
+                                }
+                            },
+                            ticks: {
+                                color: '#6b7280', /* gray-500 */
+                                callback: function(value) {
+                                    return value + '%';
+                                },
+                                font: {
+                                    family: 'Inter'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Tab functionality for Causes section
+            const tabButtons = document.querySelectorAll('#causes .tab-button');
+            const tabPanes = document.querySelectorAll('#causes .tab-pane');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+
+                    tabButtons.forEach(btn => btn.classList.remove('active', 'bg-gray-900', 'text-white', 'border-gray-900'));
+                    tabButtons.forEach(btn => btn.classList.add('border-transparent', 'text-gray-600', 'hover:text-gray-900', 'hover:border-gray-300'));
+                    
+                    button.classList.add('active', 'bg-gray-900', 'text-white', 'border-gray-900');
+                    button.classList.remove('border-transparent', 'text-gray-600', 'hover:text-gray-900', 'hover:border-gray-300');
+
+                    tabPanes.forEach(pane => {
+                        if (pane.id === tabId) {
+                            pane.classList.remove('hidden');
+                            pane.classList.add('active');
+                        } else {
+                            pane.classList.add('hidden');
+                            pane.classList.remove('active');
+                        }
+                    });
+                });
+            });
+
+            // Intersection Observer for navigation highlighting
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active', 'text-gray-900', 'border-gray-900');
+                            link.classList.add('text-gray-700', 'border-transparent');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active', 'text-gray-900', 'border-gray-900');
+                                link.classList.remove('text-gray-700', 'border-transparent');
+                            }
+                        });
+                    }
+                });
+            }, { rootMargin: '-30% 0px -30% 0px' }); // Adjust rootMargin for better active state accuracy
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>
